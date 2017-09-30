@@ -16,7 +16,7 @@ import java.util.Map;
  * which are then drawn in any box containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class SimpleGrid {
     public static final Color DEFAULT_COLOR = Color.WHITE;
@@ -138,7 +138,10 @@ public class SimpleGrid {
         if (!this.colors.containsKey(value)) {
             setColor(value, DEFAULT_COLOR);
         }
-        this.panel.repaint();
+        // Only repaint this cell. Slightly faster than repainting everything with repaint()
+        int cellX = x * (this.panel.cellSize + this.panel.gridlineWeight) + this.panel.gridlineWeight;
+        int cellY = y * (this.panel.cellSize + this.panel.gridlineWeight) + this.panel.gridlineWeight;
+        this.panel.repaint(cellX, cellY, this.panel.cellSize, this.panel.cellSize);
     }
 
     /**
