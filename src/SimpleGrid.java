@@ -16,7 +16,7 @@ import java.util.Map;
  * which are then drawn in any box containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.0
+ * @version 1.0.1
  */
 public class SimpleGrid {
     public static final Color DEFAULT_COLOR = Color.WHITE;
@@ -41,6 +41,9 @@ public class SimpleGrid {
      * @param name           The window's name.
      */
     public SimpleGrid(int width, int height, int cellSize, int gridlineWeight, String name) {
+        if (width <= 0 || height <= 0 || cellSize <= 0) {
+            throw new IllegalArgumentException("Grid dimensions and cell sizes must be positive.");
+        }
         this.panel = new GridPanel(width, height, cellSize, gridlineWeight);
         this.frame = new JFrame(name);
         this.grid = new int[height][width];
