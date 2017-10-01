@@ -9,7 +9,7 @@ import java.awt.Point;
 public class Main {
     public static void main(String[] args) {
         SimpleGrid grid = new SimpleGrid(10, 10, 50, 5, "Simple Grid Testing");
-        grid.setGridlinesColor(Color.WHITE);
+        grid.setGridlineColor(Color.WHITE);
         grid.setColor(1, Color.BLUE);
 
         Point current = null;
