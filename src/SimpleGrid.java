@@ -175,7 +175,7 @@ public class SimpleGrid {
      *
      * @param color The color to set the gridlines to.
      */
-    public void setGridlinesColor(Color color) {
+    public void setGridlineColor(Color color) {
         this.panel.setBackground(color);
         this.panel.repaint();
     }
