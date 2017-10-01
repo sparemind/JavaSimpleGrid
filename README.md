@@ -1,14 +1,14 @@
 # Java Simple Grid #
 
-This single-file project provides the means for the creation, management, and display of a simple 2D graphical grid using Java's built in standard library.
+This one file project provides the means for the creation, management, and display of a simple 2D graphical grid using Java's built in standard library.
 
 ## Overview ##
-Creating a SimpleGrid will make a new window containing a grid with the specified settings. Each cell in the grid holds a numerical value, initially 0. The color of each cell is dependent on what the value of the cell is.
+Creating a SimpleGrid will make a new window containing a grid with the specified settings. Each cell in the grid holds a numerical value, initially 0. The color and text of of each cell is dependent on what the value of the cell is. More grid layers can be added on top of the default one.
 
 Features include:
 
 * Creating grids with different dimensions and cell sizes
-* Mapping integer values to colors
+* Mapping integer values to colors, text, and text color
 * Multiple grid layers
 * Changing gridline thickness and color
 * Getting mouse input in terms of grid coordinates and button presses
@@ -49,6 +49,15 @@ for(int i = 0; i < 20; i++) {
 }
 ```
 ![Using multiple layers](img/example4.png)
+
+
+```java
+// Map text to cells
+for(int i = 2; i < 9; i++) {
+    grid.setText(i, ("" + i).charAt(0));
+}
+```
+![Using text](img/example5.png)
 
 
 ## License ##
