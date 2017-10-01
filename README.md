@@ -9,6 +9,7 @@ Features include:
 
 * Creating grids with different dimensions and cell sizes
 * Mapping integer values to colors
+* Multiple grid layers
 * Changing gridline thickness and color
 * Getting mouse input in terms of grid coordinates and button presses
 * Full JavaDoc documentation
@@ -37,6 +38,17 @@ for (int i = 0; i < 100; i++) {
 grid.setGridlineColor(Color.WHITE);
 ```
 ![Changing gridline color](img/example3.png)
+
+
+```java
+// Add a layer on top of the existing one(s)
+grid.addLayer();
+grid.setColor(-1, Color.BLACK);
+for(int i = 0; i < 20; i++) {
+    grid.set(1, random.nextInt(80), random.nextInt(50), -1);
+}
+```
+![Using multiple layers](img/example4.png)
 
 
 ## License ##

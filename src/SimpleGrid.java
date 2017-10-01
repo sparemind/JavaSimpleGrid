@@ -6,7 +6,9 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,16 +18,17 @@ import java.util.Map;
  * which are then drawn in any box containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.0.2
+ * @version 1.1
  */
 public class SimpleGrid {
     public static final Color DEFAULT_COLOR = Color.WHITE;
 
     private GridPanel panel;
     private JFrame frame;
-    private int[][] grid;
+    private List<int[][]> grids;
     private Map<Integer, Color> colors;
     private boolean mouseDown;
+    private boolean autoRepaint;
 
     /**
      * Create a new window containing a blank grid. The window will be automatically sized to fit
@@ -46,10 +49,12 @@ public class SimpleGrid {
         }
         this.panel = new GridPanel(width, height, cellSize, gridlineWeight);
         this.frame = new JFrame(name);
-        this.grid = new int[height][width];
+        this.grids = new ArrayList<>();
+        addLayer(); // Create default grid layer
         this.colors = new HashMap<>();
         this.colors.put(0, DEFAULT_COLOR);
         this.mouseDown = false;
+        this.autoRepaint = true;
 
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.add(this.panel);
@@ -63,6 +68,26 @@ public class SimpleGrid {
         this.frame.setLocationRelativeTo(null); // Center the frame
 
         this.frame.addMouseListener(new MouseListener());
+    }
+
+    /**
+     * Returns the width of the grid in number of cells.
+     *
+     * @return Number of cells wide the grid is.
+     * @since v1.1
+     */
+    public int getWidth() {
+        return this.panel.width;
+    }
+
+    /**
+     * Returns the height of the grid in number of cells.
+     *
+     * @return Number of cells high the grid is.
+     * @since v1.1
+     */
+    public int getHeight() {
+        return this.panel.height;
     }
 
     /**
@@ -112,83 +137,190 @@ public class SimpleGrid {
     }
 
     /**
-     * Set the cell at the given coordinates to a value.
+     * Creates a new grid layer on top of all others.
+     */
+    public void addLayer() {
+        this.grids.add(new int[getHeight()][getWidth()]);
+    }
+
+    /**
+     * Set whether to automatically repaint after a change is made.
+     *
+     * @param autoRepaint Whether to automatically repaint after the grid or its settings change.
+     * @see SimpleGrid#repaint();
+     * @since v1.1
+     */
+    public void setAutoRepaint(boolean autoRepaint) {
+        this.autoRepaint = autoRepaint;
+    }
+
+    /**
+     * Repaints the grid.
+     *
+     * @since v1.1
+     */
+    public void repaint() {
+        this.panel.repaint();
+    }
+
+    /**
+     * Set the cell at the given coordinates to a value. Sets the cell of the default grid (layer
+     * 0).
      *
      * @param pos   The coordinates of the cell to set. If null, the grid will not be changed.
      * @param value The value to set the cell to.
      * @see SimpleGrid#set(int, int, int)
+     * @see SimpleGrid#set(int, Point, int)
      */
     public void set(Point pos, int value) {
-        if (pos == null) {
-            return;
-        }
-        set(pos.x, pos.y, value);
+        set(0, pos, value);
     }
 
     /**
-     * Set the cell at the given coordinates to a value.
+     * Set the cell at the given coordinates to a value. Sets the cell of the default grid (layer
+     * 0).
      *
      * @param x     The x-coordinate of the cell to set.
      * @param y     The y-coordinate of the cell to set.
      * @param value The value to set the cell to.
      * @see SimpleGrid#set(Point, int)
+     * @see SimpleGrid#set(int, int, int, int)
      */
     public void set(int x, int y, int value) {
-        this.grid[y][x] = value;
+        set(0, x, y, value);
+    }
+
+    /**
+     * Set the cell at the given coordinates to a value.
+     *
+     * @param layer The layer of the cell to set
+     * @param pos   The coordinates of the cell to set. If null, the grid will not be changed.
+     * @param value The value to set the cell to.
+     * @see SimpleGrid#set(int, int, int, int)
+     * @since v1.1
+     */
+    public void set(int layer, Point pos, int value) {
+        if (pos == null) {
+            return;
+        }
+        set(layer, pos.x, pos.y, value);
+    }
+
+    /**
+     * Set the cell at the given coordinates to a value. Repaints grid if auto repainting is
+     * enabled.
+     *
+     * @param layer The layer of the cell to set. If not a valid layer, the grid will not be
+     *              changed.
+     * @param x     The x-coordinate of the cell to set.
+     * @param y     The y-coordinate of the cell to set.
+     * @param value The value to set the cell to.
+     * @see SimpleGrid#set(int, Point, int)
+     * @since v1.1
+     */
+    public void set(int layer, int x, int y, int value) {
+        if (layer < 0 || layer > this.grids.size() - 1) {
+            return;
+        }
+        this.grids.get(layer)[y][x] = value;
         if (!this.colors.containsKey(value)) {
             setColor(value, DEFAULT_COLOR);
         }
-        // Only repaint this cell. Slightly faster than repainting everything with repaint()
-        int cellX = x * (this.panel.cellSize + this.panel.gridlineWeight) + this.panel.gridlineWeight;
-        int cellY = y * (this.panel.cellSize + this.panel.gridlineWeight) + this.panel.gridlineWeight;
-        this.panel.repaint(cellX, cellY, this.panel.cellSize, this.panel.cellSize);
+        if (this.autoRepaint) {
+            // Only repaint this cell. Slightly faster than repainting everything with repaint()
+            int cellX = x * (this.panel.cellSize + this.panel.gridlineWeight) + this.panel.gridlineWeight;
+            int cellY = y * (this.panel.cellSize + this.panel.gridlineWeight) + this.panel.gridlineWeight;
+            this.panel.repaint(cellX, cellY, this.panel.cellSize, this.panel.cellSize);
+        }
     }
 
     /**
-     * Returns the value of the cell at the given coordinates.
+     * Returns the value of the cell at the given coordinates. Gets the cell of the default grid
+     * (layer 0).
      *
      * @param pos The coordinates of the cell to get.
      * @return The value of the cell. If the given position is null, returns -1.
+     * @throws NullPointerException If the given position is null.
      * @see SimpleGrid#get(int, int)
+     * @see SimpleGrid#get(int, Point)
      */
     public int get(Point pos) {
-        if (pos == null) {
-            return -1;
-        }
-        return get(pos.x, pos.y);
+        return get(0, pos);
     }
 
     /**
-     * Returns the value of the cell at the given coordinates.
+     * Returns the value of the cell at the given coordinates. Gets the cell of the default
+     * grid (layer 0).
      *
      * @param x The x-coordinate of the cell to get.
      * @param y The y-coordinate of the cell to get.
      * @return The value of the cell.
      * @see SimpleGrid#get(Point)
+     * @see SimpleGrid#get(int, int, int)
      */
     public int get(int x, int y) {
-        return this.grid[y][x];
+        return get(0, x, y);
     }
 
     /**
-     * Set the color of the gridlines.
+     * Returns the value of the cell at the given coordinates.
+     *
+     * @param layer The layer of the cell to get.
+     * @param pos   The coordinates of the cell to get.
+     * @return The value of the cell. If the given position is null, returns -1.
+     * @throws NullPointerException If the given position is null.
+     * @see SimpleGrid#get(int, int, int)
+     * @since v1.1
+     */
+    public int get(int layer, Point pos) {
+        if (pos == null) {
+            throw new NullPointerException("Position must not be null");
+        }
+        return get(layer, pos.x, pos.y);
+    }
+
+    /**
+     * Returns the value of the cell at the given coordinates.
+     *
+     * @param layer The layer of the cell to get.
+     * @param x     The x-coordinate of the cell to get.
+     * @param y     The y-coordinate of the cell to get.
+     * @return The value of the cell.
+     * @throws IllegalArgumentException If the given layer does not exist.
+     * @see SimpleGrid#get(int, Point)
+     * @since v1.1
+     */
+    public int get(int layer, int x, int y) {
+        if (layer < 0 || layer > this.grids.size() - 1) {
+            throw new IllegalArgumentException("Must specify a valid layer.");
+        }
+        return this.grids.get(layer)[y][x];
+    }
+
+    /**
+     * Set the color of the gridlines. Repaints grid if auto repainting is enabled.
      *
      * @param color The color to set the gridlines to.
      */
     public void setGridlineColor(Color color) {
         this.panel.setBackground(color);
-        this.panel.repaint();
+        if (this.autoRepaint) {
+            this.panel.repaint();
+        }
     }
 
     /**
      * Assigns a color to a given value. All cells with this value will be colored this color.
+     * Repaints grid if auto repainting is enabled.
      *
      * @param value The value to set the color of.
      * @param color The color to be assigned to the value.
      */
     public void setColor(int value, Color color) {
         this.colors.put(value, color);
-        this.panel.repaint();
+        if (this.autoRepaint) {
+            this.panel.repaint();
+        }
     }
 
     /**
@@ -224,7 +356,8 @@ public class SimpleGrid {
 
         /**
          * Paints the entire grid. The grid cells are colored according to the colors assigned to
-         * their current values.
+         * their current values. If layers exist above the default one, then only the topmost
+         * non-zero cell among them will be painted.
          *
          * @param g The graphics object that the grid will be painted with.
          */
@@ -234,7 +367,13 @@ public class SimpleGrid {
 
             for (int x = 0; x < this.width; x++) {
                 for (int y = 0; y < this.height; y++) {
-                    g.setColor(SimpleGrid.this.colors.get(SimpleGrid.this.grid[y][x]));
+                    g.setColor(SimpleGrid.this.colors.get(SimpleGrid.this.grids.get(0)[y][x]));
+                    for (int i = 1; i < SimpleGrid.this.grids.size(); i++) {
+                        int value = SimpleGrid.this.grids.get(i)[y][x];
+                        if (value != 0) {
+                            g.setColor(SimpleGrid.this.colors.get(value));
+                        }
+                    }
                     int cellX = x * (this.cellSize + this.gridlineWeight) + this.gridlineWeight;
                     int cellY = y * (this.cellSize + this.gridlineWeight) + this.gridlineWeight;
                     g.fillRect(cellX, cellY, this.cellSize, this.cellSize);
