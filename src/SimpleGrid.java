@@ -94,6 +94,16 @@ public class SimpleGrid {
     }
 
     /**
+     * Returns the JFrame that the grid is drawn on.
+     *
+     * @return The frame that the grid is drawn on.
+     * @since v1.2.1
+     */
+    public JFrame getFrame() {
+        return this.frame;
+    }
+
+    /**
      * Returns whether the given coordinates are out-of-bounds of the grid.
      *
      * @param pos The coordinates to check.
