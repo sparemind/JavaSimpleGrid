@@ -275,6 +275,34 @@ public class SimpleGrid {
     }
 
     /**
+     * Fills the grid with a value, setting all cells in the grid to the value. Fills the default
+     * grid (layer 0). Repaints grid if auto repainting is enabled.
+     *
+     * @param value The value to set all the cells in the grid to.
+     * @since 1.2.3
+     */
+    public void fill(int value) {
+        fill(0, value);
+    }
+
+    /**
+     * Fills the grid with a value, setting all cells in the grid to the value. Repaints grid if
+     * auto repainting is enabled.
+     *
+     * @param layer The grid layer to fill.
+     * @param value The value to set all the cells in the grid layer to.
+     * @since 1.2.3
+     */
+    public void fill(int layer, int value) {
+        for (int x = 0; x < this.panel.width; x++) {
+            for (int y = 0; y < this.panel.height; y++) {
+                this.grids.get(layer)[y][x] = value;
+            }
+        }
+        tryRepaint();
+    }
+
+    /**
      * Returns the value of the cell at the given coordinates. Gets the cell of the default grid
      * (layer 0).
      *
