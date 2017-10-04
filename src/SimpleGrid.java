@@ -20,7 +20,7 @@ import java.util.Map;
  * text, and text color, which are then drawn in any box containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.2.2
+ * @version 1.2.4
  */
 public class SimpleGrid {
     private GridPanel panel;
@@ -289,17 +289,86 @@ public class SimpleGrid {
      * Fills the grid with a value, setting all cells in the grid to the value. Repaints grid if
      * auto repainting is enabled.
      *
-     * @param layer The grid layer to fill.
+     * @param layer The grid layer to fill. If not a valid layer, the grid will not be changed.
      * @param value The value to set all the cells in the grid layer to.
      * @since 1.2.3
      */
     public void fill(int layer, int value) {
+        if (layer < 0 || layer > this.grids.size() - 1) {
+            return;
+        }
         for (int x = 0; x < this.panel.width; x++) {
             for (int y = 0; y < this.panel.height; y++) {
                 this.grids.get(layer)[y][x] = value;
             }
         }
         tryRepaint();
+    }
+
+    /**
+     * Fills the given row with a value, setting all cells in the row to the value. Repaints grid if
+     * auto repainting is enabled.
+     *
+     * @param row   The y-coordinate of the row to fill. If not a valid row, the grid will not be
+     *              changed.
+     * @param value The value to set all the cells in the row to.
+     * @since 1.2.4
+     */
+    public void fillRow(int row, int value) {
+        fillRow(0, row, value);
+    }
+
+    /**
+     * Fills the given row with a value, setting all cells in the row to the value. Repaints grid if
+     * auto repainting is enabled.
+     *
+     * @param layer The grid layer to fill the row of. If not a valid layer, the grid will not be
+     *              changed.
+     * @param row   The y-coordinate of the row to fill. If not a valid row, the grid will not be
+     *              changed.
+     * @param value The value to set all the cells in the row to.
+     * @since 1.2.4
+     */
+    public void fillRow(int layer, int row, int value) {
+        if (row < 0 || row >= this.panel.height || layer < 0 || layer > this.grids.size() - 1) {
+            return;
+        }
+        for (int x = 0; x < this.panel.width; x++) {
+            this.grids.get(layer)[row][x] = value;
+        }
+    }
+
+    /**
+     * Fills the given column with a value, setting all cells in the column to the value. Repaints
+     * grid if auto repainting is enabled.
+     *
+     * @param column The x-coordinate of the column to fill. If not a valid row, the grid will not
+     *               be changed.
+     * @param value  The value to set all the cells in the column to.
+     * @since 1.2.4
+     */
+    public void fillColumn(int column, int value) {
+        fillColumn(0, column, value);
+    }
+
+    /**
+     * Fills the given column with a value, setting all cells in the column to the value. Repaints
+     * grid if auto repainting is enabled.
+     *
+     * @param layer  The grid layer to fill the row of. If not a valid layer, the grid will not be
+     *               changed.
+     * @param column The x-coordinate of the column to fill. If not a valid row, the grid will not
+     *               be changed.
+     * @param value  The value to set all the cells in the column to.
+     * @since 1.2.4
+     */
+    public void fillColumn(int layer, int column, int value) {
+        if (column < 0 || column >= this.panel.width || layer < 0 || layer > this.grids.size() - 1) {
+            return;
+        }
+        for (int y = 0; y < this.panel.height; y++) {
+            this.grids.get(layer)[y][column] = value;
+        }
     }
 
     /**
