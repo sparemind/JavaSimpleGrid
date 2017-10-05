@@ -159,7 +159,8 @@ public class SimpleGrid {
     }
 
     /**
-     * Set whether to automatically repaint after a change is made.
+     * Set whether to automatically repaint after a change is made. By default, auto repainting is
+     * enabled.
      *
      * @param autoRepaint Whether to automatically repaint after the grid or its settings change.
      * @see SimpleGrid#repaint()
@@ -279,6 +280,7 @@ public class SimpleGrid {
      * grid (layer 0). Repaints grid if auto repainting is enabled.
      *
      * @param value The value to set all the cells in the grid to.
+     * @see SimpleGrid#setAutoRepaint(boolean)
      * @since 1.2.3
      */
     public void fill(int value) {
@@ -291,6 +293,7 @@ public class SimpleGrid {
      *
      * @param layer The grid layer to fill. If not a valid layer, the grid will not be changed.
      * @param value The value to set all the cells in the grid layer to.
+     * @see SimpleGrid#setAutoRepaint(boolean)
      * @since 1.2.3
      */
     public void fill(int layer, int value) {
@@ -312,6 +315,7 @@ public class SimpleGrid {
      * @param row   The y-coordinate of the row to fill. If not a valid row, the grid will not be
      *              changed.
      * @param value The value to set all the cells in the row to.
+     * @see SimpleGrid#setAutoRepaint(boolean)
      * @since 1.2.4
      */
     public void fillRow(int row, int value) {
@@ -327,6 +331,7 @@ public class SimpleGrid {
      * @param row   The y-coordinate of the row to fill. If not a valid row, the grid will not be
      *              changed.
      * @param value The value to set all the cells in the row to.
+     * @see SimpleGrid#setAutoRepaint(boolean)
      * @since 1.2.4
      */
     public void fillRow(int layer, int row, int value) {
@@ -345,6 +350,7 @@ public class SimpleGrid {
      * @param column The x-coordinate of the column to fill. If not a valid row, the grid will not
      *               be changed.
      * @param value  The value to set all the cells in the column to.
+     * @see SimpleGrid#setAutoRepaint(boolean)
      * @since 1.2.4
      */
     public void fillColumn(int column, int value) {
@@ -360,6 +366,7 @@ public class SimpleGrid {
      * @param column The x-coordinate of the column to fill. If not a valid row, the grid will not
      *               be changed.
      * @param value  The value to set all the cells in the column to.
+     * @see SimpleGrid#setAutoRepaint(boolean)
      * @since 1.2.4
      */
     public void fillColumn(int layer, int column, int value) {
@@ -438,6 +445,7 @@ public class SimpleGrid {
      * Set the color of the gridlines. Repaints grid if auto repainting is enabled.
      *
      * @param color The color to set the gridlines to.
+     * @see SimpleGrid#setAutoRepaint(boolean)
      */
     public void setGridlineColor(Color color) {
         this.panel.setBackground(color);
