@@ -222,7 +222,7 @@ public class SimpleGrid {
 
     /**
      * Set the cell at the given coordinates to a value. Sets the cell of the default grid (layer
-     * 0).
+     * 0). This is equivalent to calling set(0, Point, int).
      *
      * @param x     The x-coordinate of the cell to set.
      * @param y     The y-coordinate of the cell to set.
@@ -277,7 +277,8 @@ public class SimpleGrid {
 
     /**
      * Fills the grid with a value, setting all cells in the grid to the value. Fills the default
-     * grid (layer 0). Repaints grid if auto repainting is enabled.
+     * grid (layer 0). Repaints grid if auto repainting is enabled. This is equivalent to calling
+     * fill(0, int).
      *
      * @param value The value to set all the cells in the grid to.
      * @see SimpleGrid#setAutoRepaint(boolean)
@@ -310,7 +311,7 @@ public class SimpleGrid {
 
     /**
      * Fills the given row with a value, setting all cells in the row to the value. Repaints grid if
-     * auto repainting is enabled.
+     * auto repainting is enabled. This is equivalent to calling fillRow(0, int).
      *
      * @param row   The y-coordinate of the row to fill. If not a valid row, the grid will not be
      *              changed.
@@ -345,7 +346,7 @@ public class SimpleGrid {
 
     /**
      * Fills the given column with a value, setting all cells in the column to the value. Repaints
-     * grid if auto repainting is enabled.
+     * grid if auto repainting is enabled. This is equivalent to calling fillColumn(0, int).
      *
      * @param column The x-coordinate of the column to fill. If not a valid row, the grid will not
      *               be changed.
@@ -380,7 +381,7 @@ public class SimpleGrid {
 
     /**
      * Returns the value of the cell at the given coordinates. Gets the cell of the default grid
-     * (layer 0).
+     * (layer 0). This is equivalent to calling get(0, Point).
      *
      * @param pos The coordinates of the cell to get.
      * @return The value of the cell. If the given position is null, returns -1.
@@ -394,7 +395,7 @@ public class SimpleGrid {
 
     /**
      * Returns the value of the cell at the given coordinates. Gets the cell of the default
-     * grid (layer 0).
+     * grid (layer 0). This is equivalent to calling get(0, int, int).
      *
      * @param x The x-coordinate of the cell to get.
      * @param y The y-coordinate of the cell to get.
