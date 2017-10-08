@@ -5,7 +5,7 @@ This one file project provides the means for the creation, management, and displ
 ## Overview ##
 Creating a SimpleGrid will make a new window containing a grid with the specified settings. Each cell in the grid holds a numerical value, initially 0. The color and text of of each cell is dependent on what the value of the cell is. More grid layers can be added on top of the default one.
 
-Features include:
+**Features include:**
 
 * Creating grids with different dimensions and cell sizes
 * Mapping integer values to colors, text, and text color
