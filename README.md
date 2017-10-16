@@ -11,6 +11,7 @@ Creating a SimpleGrid will make a new window containing a grid with the specifie
 * Mapping integer values to colors, text, and text color
 * Multiple grid layers
 * Changing gridline thickness and color
+* Editing functions such as filling and replacing
 * Getting mouse input in terms of grid coordinates and button presses
 * Full JavaDoc documentation
 
