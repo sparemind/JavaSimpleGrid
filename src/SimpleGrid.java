@@ -43,7 +43,7 @@ import java.util.Map;
  * text, and text color, which are then drawn in any box containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.2.5
+ * @version 1.2.6
  */
 public class SimpleGrid {
     private GridPanel panel;
@@ -150,7 +150,7 @@ public class SimpleGrid {
      * @see SimpleGrid#isOOB(Point)
      */
     public boolean isOOB(int x, int y) {
-        return x < 0 || y < 0 || x >= this.panel.width || y > this.panel.height;
+        return x < 0 || y < 0 || x >= this.panel.width || y >= this.panel.height;
     }
 
     /**
