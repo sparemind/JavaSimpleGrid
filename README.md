@@ -59,7 +59,3 @@ for(int i = 2; i < 9; i++) {
 }
 ```
 ![Using text](img/example5.png)
-
-
-## License ##
-This project is licensed under the MIT license. See [LICENSE](LICENSE) for details.
