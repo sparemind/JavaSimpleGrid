@@ -32,7 +32,7 @@ import java.awt.Point;
  * containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.2.7
+ * @version 1.2.8
  */
 public class SubGrid {
     private final SimpleGrid grid;
@@ -57,6 +57,26 @@ public class SubGrid {
         this.y = y;
         this.width = width;
         this.height = height;
+    }
+
+    /**
+     * Returns the width of the sub-grid in number of cells.
+     *
+     * @return Number of cells wide the sub-grid is.
+     * @since v1.2.8
+     */
+    public int getWidth() {
+        return this.width;
+    }
+
+    /**
+     * Returns the height of the sub-grid in number of cells.
+     *
+     * @return Number of cells high the sub-grid is.
+     * @since v1.2.8
+     */
+    public int getHeight() {
+        return this.height;
     }
 
     /**
