@@ -32,7 +32,7 @@ import java.awt.Point;
  * containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.2.8
+ * @version 1.2.9
  */
 public class SubGrid {
     private final SimpleGrid grid;

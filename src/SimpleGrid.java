@@ -1,5 +1,6 @@
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -45,7 +46,7 @@ import java.util.Map;
  * containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.2.8
+ * @version 1.2.9
  */
 public class SimpleGrid {
     private GridPanel panel;
@@ -86,7 +87,7 @@ public class SimpleGrid {
         this.mouseDown = false;
         this.autoRepaint = true;
 
-        this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.frame.add(this.panel);
         this.frame.setVisible(true);
         this.frame.setResizable(false);
@@ -245,6 +246,8 @@ public class SimpleGrid {
      * @param pos   The coordinates of the cell to set. If null, the grid will
      *              not be changed.
      * @param value The value to set the cell to.
+     * @throws GridIndexOutOfBoundsException If the given coordinates are out of
+     *                                       bounds.
      * @see SimpleGrid#set(int, int, int)
      * @see SimpleGrid#set(int, Point, int)
      */
@@ -255,11 +258,13 @@ public class SimpleGrid {
     /**
      * Set the cell at the given coordinates to a value. Sets the cell of the
      * default grid (layer 0). This is equivalent to calling set(0, Point,
-     * int).
+     * value).
      *
      * @param x     The x-coordinate of the cell to set.
      * @param y     The y-coordinate of the cell to set.
      * @param value The value to set the cell to.
+     * @throws GridIndexOutOfBoundsException If the given coordinates are out of
+     *                                       bounds.
      * @see SimpleGrid#set(Point, int)
      * @see SimpleGrid#set(int, int, int, int)
      */
@@ -274,6 +279,8 @@ public class SimpleGrid {
      * @param pos   The coordinates of the cell to set. If null, the grid will
      *              not be changed.
      * @param value The value to set the cell to.
+     * @throws GridIndexOutOfBoundsException If the given coordinates are out of
+     *                                       bounds.
      * @see SimpleGrid#set(int, int, int, int)
      * @since v1.1
      */
@@ -293,12 +300,17 @@ public class SimpleGrid {
      * @param x     The x-coordinate of the cell to set.
      * @param y     The y-coordinate of the cell to set.
      * @param value The value to set the cell to.
+     * @throws GridIndexOutOfBoundsException If the given coordinates are out of
+     *                                       bounds.
      * @see SimpleGrid#set(int, Point, int)
      * @since v1.1
      */
     public void set(int layer, int x, int y, int value) {
         if (layer < 0 || layer > this.grids.size() - 1) {
             return;
+        }
+        if (isOOB(x, y)) {
+            throw new GridIndexOutOfBoundsException("Grid coordinates must be in bounds.");
         }
         this.grids.get(layer)[y][x] = value;
         ensureValueData(value);
@@ -312,7 +324,7 @@ public class SimpleGrid {
     /**
      * Fills the grid with a value, setting all cells in the grid to the value.
      * Fills the default grid (layer 0). Repaints grid if auto repainting is
-     * enabled. This is equivalent to calling fill(0, int).
+     * enabled. This is equivalent to calling fill(0, value).
      *
      * @param value The value to set all the cells in the grid to.
      * @see SimpleGrid#setAutoRepaint(boolean)
@@ -385,7 +397,7 @@ public class SimpleGrid {
     /**
      * Fills the given row with a value, setting all cells in the row to the
      * value. Repaints grid if auto repainting is enabled. This is equivalent to
-     * calling fillRow(0, int).
+     * calling fillRow(0, row, value).
      *
      * @param row   The y-coordinate of the row to fill. If not a valid row, the
      *              grid will not be changed.
@@ -421,7 +433,7 @@ public class SimpleGrid {
     /**
      * Fills the given column with a value, setting all cells in the column to
      * the value. Repaints grid if auto repainting is enabled. This is
-     * equivalent to calling fillColumn(0, int).
+     * equivalent to calling fillColumn(0, column, value).
      *
      * @param column The x-coordinate of the column to fill. If not a valid row,
      *               the grid will not be changed.
@@ -456,11 +468,13 @@ public class SimpleGrid {
 
     /**
      * Returns the value of the cell at the given coordinates. Gets the cell of
-     * the default grid (layer 0). This is equivalent to calling get(0, Point).
+     * the default grid (layer 0). This is equivalent to calling get(0, pos).
      *
      * @param pos The coordinates of the cell to get.
-     * @return The value of the cell. If the given position is null, returns -1.
-     * @throws NullPointerException If the given position is null.
+     * @return The value of the cell.
+     * @throws NullPointerException          If the given position is null.
+     * @throws GridIndexOutOfBoundsException If the given coordinates are out of
+     *                                       bounds.
      * @see SimpleGrid#get(int, int)
      * @see SimpleGrid#get(int, Point)
      */
@@ -470,12 +484,13 @@ public class SimpleGrid {
 
     /**
      * Returns the value of the cell at the given coordinates. Gets the cell of
-     * the default grid (layer 0). This is equivalent to calling get(0, int,
-     * int).
+     * the default grid (layer 0). This is equivalent to calling get(0, x, y).
      *
      * @param x The x-coordinate of the cell to get.
      * @param y The y-coordinate of the cell to get.
      * @return The value of the cell.
+     * @throws GridIndexOutOfBoundsException If the given coordinates are out of
+     *                                       bounds.
      * @see SimpleGrid#get(Point)
      * @see SimpleGrid#get(int, int, int)
      */
@@ -488,8 +503,11 @@ public class SimpleGrid {
      *
      * @param layer The layer of the cell to get.
      * @param pos   The coordinates of the cell to get.
-     * @return The value of the cell. If the given position is null, returns -1.
-     * @throws NullPointerException If the given position is null.
+     * @return The value of the cell.
+     * @throws NullPointerException          If the given position is null.
+     * @throws IllegalArgumentException      If the given layer does not exist.
+     * @throws GridIndexOutOfBoundsException If the given coordinates are out of
+     *                                       bounds.
      * @see SimpleGrid#get(int, int, int)
      * @since v1.1
      */
@@ -507,13 +525,18 @@ public class SimpleGrid {
      * @param x     The x-coordinate of the cell to get.
      * @param y     The y-coordinate of the cell to get.
      * @return The value of the cell.
-     * @throws IllegalArgumentException If the given layer does not exist.
+     * @throws IllegalArgumentException      If the given layer does not exist.
+     * @throws GridIndexOutOfBoundsException If the given coordinates are out of
+     *                                       bounds.
      * @see SimpleGrid#get(int, Point)
      * @since v1.1
      */
     public int get(int layer, int x, int y) {
         if (layer < 0 || layer > this.grids.size() - 1) {
             throw new IllegalArgumentException("Must specify a valid layer.");
+        }
+        if (isOOB(x, y)) {
+            throw new GridIndexOutOfBoundsException("Grid coordinates must be in bounds.");
         }
         return this.grids.get(layer)[y][x];
     }
@@ -837,6 +860,31 @@ public class SimpleGrid {
         @Override
         public void mouseReleased(MouseEvent e) {
             SimpleGrid.this.mouseDown = false;
+        }
+    }
+
+    /**
+     * Thrown to indicate that an index of a grid coordinate is out of range.
+     *
+     * @since 1.2.9
+     */
+    public class GridIndexOutOfBoundsException extends IndexOutOfBoundsException {
+        /**
+         * Constructs a <code>GridIndexOutOfBoundsException</code> with no
+         * detail message.
+         */
+        public GridIndexOutOfBoundsException() {
+            super();
+        }
+
+        /**
+         * Constructs a <code>GridIndexOutOfBoundsException</code> with the
+         * specified detail message.
+         *
+         * @param message the detail message.
+         */
+        public GridIndexOutOfBoundsException(String message) {
+            super(message);
         }
     }
 }
