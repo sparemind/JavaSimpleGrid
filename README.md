@@ -3,12 +3,12 @@
 This one file project provides the means for the creation, management, and display of a simple 2D graphical grid using Java's built in standard library.
 
 ## Overview ##
-Creating a SimpleGrid will make a new window containing a grid with the specified settings. Each cell in the grid holds a numerical value, initially 0. The color and text of of each cell is dependent on what the value of the cell is. More grid layers can be added on top of the default one.
+Creating a SimpleGrid will make a new window containing a grid with the specified settings. Each cell in the grid holds a numerical value, initially 0. The color, text, and image of each cell is dependent on what the value of the cell is. More grid layers can be added on top of the default one.
 
 **Features include:**
 
 * Creating grids with different dimensions and cell sizes
-* Mapping integer values to colors, text, and text color
+* Mapping integer values to colors, text, text colors, and images
 * Multiple grid layers
 * Changing gridline thickness and color
 * Editing functions such as filling and replacing
@@ -42,6 +42,13 @@ grid.setGridlineColor(Color.WHITE);
 
 
 ```java
+// Map an image to a value
+grid.setImage(2, ImageIO.read(new File("knight.png")));
+```
+![Changing gridline color](img/example4.png)
+
+
+```java
 // Add a layer on top of the existing one(s)
 grid.addLayer();
 grid.setColor(-1, Color.BLACK);
@@ -49,7 +56,7 @@ for(int i = 0; i < 20; i++) {
     grid.set(1, random.nextInt(80), random.nextInt(50), -1);
 }
 ```
-![Using multiple layers](img/example4.png)
+![Using multiple layers](img/example5.png)
 
 
 ```java
@@ -58,7 +65,7 @@ for(int i = 2; i < 9; i++) {
     grid.setText(i, ("" + i).charAt(0));
 }
 ```
-![Using text](img/example5.png)
+![Using text](img/example6.png)
 
 ## License ##
 This project is licensed under the MIT license.

@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +47,7 @@ import java.util.Map;
  * containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.2.9
+ * @version 1.3
  */
 public class SimpleGrid {
     private GridPanel panel;
@@ -83,7 +84,7 @@ public class SimpleGrid {
         this.grids = new ArrayList<>();
         addLayer(); // Create default grid layer
         this.valueData = new HashMap<>();
-        this.valueData.put(0, new ValueData(null, ValueData.DEFAULT_TEXT_COLOR, '\0'));
+        this.valueData.put(0, new ValueData(null, ValueData.DEFAULT_TEXT_COLOR, '\0', null));
         this.mouseDown = false;
         this.autoRepaint = true;
 
@@ -608,13 +609,30 @@ public class SimpleGrid {
      *
      * @param value The value to set the text of.
      * @param text  The text character to be assigned to the value. If '\0',
-     *              cells with this value will display nothing.
+     *              cells with this value will display no text.
      * @see SimpleGrid#setAutoRepaint(boolean)
      * @since v1.2
      */
     public void setText(int value, char text) {
         ensureValueData(value);
         this.valueData.get(value).text = text;
+        tryRepaint();
+    }
+
+    /**
+     * Assigns an image to a given value. All cells with this image will display
+     * this image (stretched to fit the cell bounds). Repaints grid if auto
+     * repainting is enabled.
+     *
+     * @param value The value to set the image of.
+     * @param image The image to be assigned to the value. If null, cells with
+     *              this text will display no image.
+     * @see SimpleGrid#setAutoRepaint(boolean)
+     * @since v1.3
+     */
+    public void setImage(int value, BufferedImage image) {
+        ensureValueData(value);
+        this.valueData.get(value).image = image;
         tryRepaint();
     }
 
@@ -635,12 +653,13 @@ public class SimpleGrid {
         public Color color;
         public Color textColor;
         public char text;
+        public BufferedImage image;
 
         /**
          * Creates data with default color values and text of '\0'.
          */
         public ValueData() {
-            this(DEFAULT_COLOR, DEFAULT_TEXT_COLOR, '\0');
+            this(DEFAULT_COLOR, DEFAULT_TEXT_COLOR, '\0', null);
         }
 
         /**
@@ -649,11 +668,13 @@ public class SimpleGrid {
          * @param color     The color of the cell.
          * @param textColor The color of the text character.
          * @param text      The cell text character.
+         * @param image     The image of the cell.
          */
-        public ValueData(Color color, Color textColor, char text) {
+        public ValueData(Color color, Color textColor, char text, BufferedImage image) {
             this.color = color;
             this.textColor = textColor;
             this.text = text;
+            this.image = image;
         }
 
         @Override
@@ -663,6 +684,7 @@ public class SimpleGrid {
             hash = hash * prime + this.color.hashCode();
             hash = hash * prime + this.textColor.hashCode();
             hash = hash * prime + Character.hashCode(this.text);
+            hash = hash * prime + this.image.hashCode();
             return hash;
         }
 
@@ -672,7 +694,7 @@ public class SimpleGrid {
                 return false;
             }
             final ValueData other = (ValueData) o;
-            return (this.text == other.text && this.color.equals(other.color) && this.textColor.equals(other.textColor));
+            return (this.text == other.text && this.color.equals(other.color) && this.textColor.equals(other.textColor) && this.image.equals(other.image));
         }
     }
 
@@ -712,17 +734,51 @@ public class SimpleGrid {
 
         /**
          * Paints the entire grid. The grid cells are colored and filled
-         * according to the colors and text assigned to their current values.
+         * according to the colors, text, and images assigned to their current
+         * values.
          * <p>
-         * If a cell color is "null" then only the cell's text will be drawn,
+         * If a cell color is null then the cell will painted with no color,
          * unless the cell is on layer 0, in which case the cell will be painted
-         * white. If a cell's text is '\0' it will not be drawn.
+         * white. If a cell's text is '\0' it will not be drawn. If a cell's
+         * image is null is will not be drawn.
          * <p>
          * The final appearance of each cell will be as follows: <ul> <li>The
          * cell will be painted with the topmost non-null color</li> <li>The
          * cell will contain the text of the topmost non '\0' character</li>
          * <li>If a non-null color is above this character, no text will be
-         * drawn</li> </ul>
+         * drawn</li> <li>The cell will be drawn with all images on layers above
+         * the topmost non-null color, from the bottom to top. </li> <li>Images
+         * on layers below the layer with the drawn text will be drawn below the
+         * text</li><li>For text and image on the same layer, the text will be
+         * drawn over the image</li></ul>
+         * <p>
+         * The following diagram demonstrates an example of this drawing process
+         * for a single cell. The left shows the ValueData for all layers and
+         * the right shows what will be drawn (from bottom to top).
+         * <pre>
+         * This box represents the ValueData for a cell on a particular layer:
+         * +---------+
+         * | Image   |
+         * | Text    |
+         * | Color   |
+         * +---------+
+         *
+         *         +---------+      +---------+
+         * Layer 2 | IMG_2   |      | IMG_2   |
+         *         | TEXT_2  | ===> | TEXT_2  |
+         *         | null    |      | IMG_1   |
+         *         +---------+      | COLOR_1 |
+         * Layer 1 | IMG_1   |      +---------+
+         *         | TEXT_1  |
+         *         | COLOR_1 |
+         *         +---------+
+         * Layer 0 | IMG_0   |
+         *         | TEXT_0  |
+         *         | COLOR_0 |
+         *         +---------+
+         * </pre>
+         * In particular note that for the most part everything is drawn layer
+         * by layer, but things below an opaque color won't be drawn.
          *
          * @param g The graphics object that the grid will be painted with.
          */
@@ -738,11 +794,16 @@ public class SimpleGrid {
             // Paint all cells
             for (int x = 0; x < this.width; x++) {
                 for (int y = 0; y < this.height; y++) {
-                    // Begin with colors/text being those of the layer 0 cells
+                    // Begin with colors/text/image being those of the layer 0 cells
                     ValueData defaultLayer = SimpleGrid.this.valueData.get(SimpleGrid.this.grids.get(0)[y][x]);
                     Color topColor = defaultLayer.color == null ? Color.WHITE : defaultLayer.color;
                     char topText = defaultLayer.text;
                     Color topTextColor = defaultLayer.textColor;
+
+                    // Highest layer with an opaque color
+                    int highestOpaqueColor = 0;
+                    // Highest layer with non-empty text
+                    int highestNonEmptyText = 0;
 
                     // Find the topmost colors/text that should be drawn
                     for (int i = 1; i < SimpleGrid.this.grids.size(); i++) {
@@ -751,11 +812,13 @@ public class SimpleGrid {
 
                         if (data.color != null) {
                             topColor = data.color;
-                            topText = '\0'; // Clear text if a non-null color is above it
+                            topText = '\0'; // Clear text if a non-null (opaque) color is above it
+                            highestOpaqueColor = i;
                         }
                         if (data.text != '\0') {
                             topText = data.text;
                             topTextColor = data.textColor;
+                            highestNonEmptyText = i;
                         }
                     }
                     g.setColor(topColor);
@@ -765,9 +828,19 @@ public class SimpleGrid {
                     int cellY = y * (this.cellSize + this.gridlineWeight) + this.gridlineWeight;
                     g.fillRect(cellX, cellY, this.cellSize, this.cellSize);
 
-                    // Draw text
-                    if (topText != '\0') {
-                        drawCenteredChar(g, x, y, topText, topTextColor);
+                    for (int i = highestOpaqueColor; i < SimpleGrid.this.grids.size(); i++) {
+                        int value = SimpleGrid.this.grids.get(i)[y][x];
+                        ValueData data = SimpleGrid.this.valueData.get(value);
+
+                        // Draw cell image
+                        g.drawImage(data.image, cellX, cellY, this.cellSize, this.cellSize, this);
+
+                        if (i == highestNonEmptyText) {
+                            // Draw text
+                            if (topText != '\0') {
+                                drawCenteredChar(g, x, y, topText, topTextColor);
+                            }
+                        }
                     }
                 }
             }
