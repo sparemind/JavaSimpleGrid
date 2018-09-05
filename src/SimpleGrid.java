@@ -1,3 +1,4 @@
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
@@ -6,14 +7,19 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 /**
  * MIT License
@@ -47,7 +53,7 @@ import java.util.Map;
  * containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.3
+ * @version 1.3.1
  */
 public class SimpleGrid {
     private GridPanel panel;
@@ -634,6 +640,111 @@ public class SimpleGrid {
         ensureValueData(value);
         this.valueData.get(value).image = image;
         tryRepaint();
+    }
+
+    /**
+     * Saves a PNG image of the grid.
+     *
+     * @param file The file to write the image to.
+     * @throws IOException If an error occurs while writing the image to the
+     *                     file.
+     * @see #getGridImage()
+     * @since v1.3.1
+     */
+    public void saveGridImage(File file) throws IOException {
+        ImageIO.write(getGridImage(), "png", file);
+    }
+
+    /**
+     * Creates an image of the grid.
+     *
+     * @return An image of the grid.
+     * @see #saveGridImage(File)
+     * @since v1.3.1
+     */
+    public RenderedImage getGridImage() {
+        // @formatter:off
+        BufferedImage img = new BufferedImage(
+                this.panel.getWidth(),
+                this.panel.getHeight(),
+                BufferedImage.TYPE_INT_RGB);
+        // @formatter:on
+        Graphics2D g2d = img.createGraphics();
+
+        this.panel.printAll(g2d);
+        return img;
+    }
+
+    /**
+     * Returns an ASCII string representation of the grid's contents that can
+     * be loaded using {@link #loadGrid(String)}. Only cell values will be
+     * saved. Grid settings such as dimensions, gridline configuration, value
+     * color/text/text color assignment, etc. will not be saved.
+     *
+     * @return A string representation of this grid's contents.
+     * @see #loadGrid(String)
+     * @since v1.3.1
+     */
+    public String saveGrid() {
+        StringBuilder sb = new StringBuilder();
+
+        // Process each layer
+        for (int i = 0; i < this.grids.size(); i++) {
+            int[][] layer = this.grids.get(i);
+
+            // Process each cell in this layer
+            sb.append(layer[0][0]);
+            for (int y = 0; y < getHeight(); y++) {
+                for (int x = 0; x < getWidth(); x++) {
+                    if (y == 0 && x == 0) {
+                        continue;
+                    }
+                    sb.append(' ').append(layer[y][x]);
+                }
+            }
+
+            // Separate layer data with ":"
+            if (i < this.grids.size() - 1) {
+                sb.append(':');
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Load an ASCII string representation of grid contents saved by
+     * {@link #saveGridImage(File)}. Additional layers will be added if needed
+     * to load the grid. If this grid has more layers than are used in the grid
+     * being loaded, any extra layers will be unchanged. All existing values in
+     * grid layers used by grid being loaded will be overwritten to match the
+     * new grid data.
+     * <p>
+     * Grid settings such as dimensions, gridline configuration, value
+     * color/text/text color assignment, etc. will not be changed.
+     *
+     * @param gridData The saved grid data to load. Must have been saved from a
+     *                 grid with equal dimensions as this one.
+     * @see #saveGridImage(File)
+     * @since v1.3.1
+     */
+    public void loadGrid(String gridData) {
+        String[] layers = gridData.split(":");
+
+        // Add any needed layers
+        while (layers.length > this.grids.size()) {
+            addLayer();
+        }
+
+        // Load layer data
+        for (int i = 0; i < layers.length; i++) {
+            Scanner scanner = new Scanner(layers[i]);
+            for (int y = 0; y < getHeight(); y++) {
+                for (int x = 0; x < getWidth(); x++) {
+                    this.grids.get(i)[y][x] = scanner.nextInt();
+                }
+            }
+        }
     }
 
     /**

@@ -13,6 +13,8 @@ Creating a SimpleGrid will make a new window containing a grid with the specifie
 * Changing gridline thickness and color
 * Editing functions such as filling and replacing
 * Getting mouse input in terms of grid coordinates and button presses
+* Saving and loading grids
+* Saving images of grids
 * Full JavaDoc documentation
 
 ## Examples ##
