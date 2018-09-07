@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * MIT License
@@ -53,7 +52,7 @@ import java.util.Scanner;
  * containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.3.1
+ * @version 1.3.2
  */
 public class SimpleGrid {
     private GridPanel panel;
@@ -738,10 +737,11 @@ public class SimpleGrid {
 
         // Load layer data
         for (int i = 0; i < layers.length; i++) {
-            Scanner scanner = new Scanner(layers[i]);
+            String[] cells = layers[i].split(" ");
             for (int y = 0; y < getHeight(); y++) {
                 for (int x = 0; x < getWidth(); x++) {
-                    this.grids.get(i)[y][x] = scanner.nextInt();
+                    int index = y * getWidth() + x;
+                    this.grids.get(i)[y][x] = Integer.parseInt(cells[index]);
                 }
             }
         }
