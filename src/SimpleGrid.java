@@ -52,7 +52,7 @@ import java.util.Map;
  * containing the corresponding value.
  *
  * @author Jake Chiang
- * @version 1.3.2
+ * @version 1.3.3
  */
 public class SimpleGrid {
     private GridPanel panel;
@@ -193,6 +193,48 @@ public class SimpleGrid {
      */
     public void addLayer() {
         this.grids.add(new int[getHeight()][getWidth()]);
+    }
+
+    /**
+     * Removes the top grid layer. Repaints the grid if auto repainting is
+     * enabled.
+     * <p>
+     * If there is only 1 grid layer, it cannot be removed.
+     *
+     * @see #removeLayer(int)
+     * @since v1.3.3
+     */
+    public void removeLayer() {
+        removeLayer(this.grids.size() - 1);
+        tryRepaint();
+    }
+
+    /**
+     * Removes the specified grid layer. The layer indices of all layers above
+     * the removed layer will be decremented. Repaints the grid if auto
+     * repainting is enabled.
+     * <p>
+     * If the given index doesn't specify a valid layer, nothing will happen. If
+     * there is only 1 grid layer, it cannot be removed.
+     *
+     * @param layerIndex The index of the layer to remove. The lowest layer is
+     *                   considered layer 0.
+     */
+    public void removeLayer(int layerIndex) {
+        if (this.grids.size() <= 1 || layerIndex < 0 || layerIndex > this.grids.size() - 1) {
+            return;
+        }
+        this.grids.remove(layerIndex);
+    }
+
+    /**
+     * Returns the number of layers in this grid.
+     *
+     * @return The number of layers in this grid.
+     * @since v1.3.3
+     */
+    public int getNumLayers() {
+        return this.grids.size();
     }
 
     /**
@@ -748,6 +790,28 @@ public class SimpleGrid {
     }
 
     /**
+     * Set the font to use to draw text in cells. Repaints the grid if auto
+     * repainting is enabled.
+     *
+     * @param font The font to use to draw text in cells.
+     * @since v1.3.3
+     */
+    public void setFont(Font font) {
+        this.panel.font = font;
+        tryRepaint();
+    }
+
+    /**
+     * Returns the point size of the font being used to draw text in cells.
+     *
+     * @return The point size of the font being used to draw the in cells.
+     * @since v1.3.3
+     */
+    public int getFontSize() {
+        return this.panel.font.getSize();
+    }
+
+    /**
      * This class holds the data mapped to grid values. Consists of:
      * <ul>
      * <li>Cell color</li>
@@ -816,6 +880,45 @@ public class SimpleGrid {
     private class GridPanel extends JPanel {
         private static final long serialVersionUID = 4114771226550991401L;
 
+        // @formatter:off
+        // Lookup table where FONT_SIZE[cellSize] gives the size of the
+        // bold, Monospace font that will fit into a cell of cellSize pixels.
+        private final int[] FONT_SIZE = {
+                0,   1,   1,   2,   3,   4,   5,   5,
+                6,   7,   8,   9,   9,   10,  11,  12,
+                13,  13,  15,  16,  17,  18,  18,  19,
+                20,  21,  22,  22,  23,  24,  25,  26,
+                26,  27,  29,  30,  30,  31,  32,  33,
+                34,  35,  35,  36,  37,  38,  39,  39,
+                40,  41,  43,  43,  44,  45,  46,  47,
+                47,  48,  49,  50,  51,  52,  52,  53,
+                54,  55,  56,  57,  58,  59,  60,  60,
+                61,  62,  63,  64,  64,  65,  66,  67,
+                68,  69,  70,  71,  72,  73,  73,  74,
+                75,  76,  77,  77,  78,  79,  80,  81,
+                81,  82,  84,  85,  86,  86,  87,  88,
+                89,  90,  90,  91,  92,  93,  94,  94,
+                95,  96,  98,  98,  99,  100, 101, 102,
+                102, 103, 104, 105, 106, 107, 107, 108,
+                109, 110, 111, 112, 113, 114, 115, 115,
+                116, 117, 118, 119, 119, 120, 121, 122,
+                123, 124, 124, 126, 127, 128, 128, 129,
+                130, 131, 132, 132, 133, 134, 135, 136,
+                136, 137, 138, 140, 141, 141, 142, 143,
+                144, 145, 145, 146, 147, 148, 149, 149,
+                150, 151, 152, 153, 154, 155, 156, 157,
+                158, 158, 159, 160, 161, 162, 162, 163,
+                164, 165, 166, 166, 168, 169, 170, 170,
+                171, 172, 173, 174, 175, 175, 176, 177,
+                178, 179, 179, 180, 182, 183, 183, 184,
+                185, 186, 187, 187, 188, 189, 190, 191,
+                192, 192, 193, 194, 196, 196, 197, 198,
+                199, 200, 200, 201, 202, 203, 204, 204,
+                205, 206, 207, 208, 208, 210, 211, 212,
+                213, 213, 214, 215, 216, 217, 217, 218
+        };
+        // @formatter:on
+
         private int width;
         private int height;
         private int cellSize;
@@ -839,7 +942,15 @@ public class SimpleGrid {
             this.height = height;
             this.cellSize = cellSize;
             this.gridlineWeight = gridlineWeight;
-            this.font = null;
+            int fontSize;
+            if (cellSize < this.FONT_SIZE.length) {
+                fontSize = this.FONT_SIZE[cellSize];
+            } else {
+                // Linear regression approximation derived from the results
+                // found for the lookup table
+                fontSize = (int) (0.8589 * cellSize - 0.6799);
+            }
+            this.font = new Font(Font.MONOSPACED, Font.BOLD, fontSize);
             setBackground(Color.BLACK);
         }
 
@@ -896,11 +1007,6 @@ public class SimpleGrid {
         @Override
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
-
-            // Setup the font if it has not been done
-            if (this.font == null) {
-                setupFont(g);
-            }
 
             // Paint all cells
             for (int x = 0; x < this.width; x++) {
@@ -969,7 +1075,7 @@ public class SimpleGrid {
             int textHeight = 0;
             while (textHeight < this.cellSize) {
                 fontSize++;
-                this.font = new Font("Monospaced", Font.BOLD, fontSize);
+                this.font = new Font(Font.MONOSPACED, Font.BOLD, fontSize);
                 FontMetrics metrics = g.getFontMetrics(this.font);
                 textHeight = metrics.getHeight();
             }
